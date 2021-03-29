@@ -1,40 +1,29 @@
 // Add your JavaScript code here
-const MAX_WIDTH = Math.max(1080, window.innerWidth);
-const MAX_HEIGHT = 720;
-const margin = { top: 40, right: 100, bottom: 40, left: 175 };
+function actornetwork(width, height, data) {
 
-// Assumes the same graph width, height dimensions as the example dashboard. Feel free to change these if you'd like
-let graph_1_width = MAX_WIDTH, graph_1_height = 720;
-let graph_2_width = (MAX_WIDTH / 2) - 10, graph_2_height = 275;
-let graph_3_width = MAX_WIDTH / 2, graph_3_height = 575;
+    var tooltip = d3.select("body")
+        .append("div")
+        .style("position", "absolute")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("pointer-events", "none")
+        .style("padding", "10px");
 
+    let svg = d3.select("#graph3")
+        .append("svg")
+        .attr('width', width)
+        .attr('height', height)
+        .call(d3.zoom().on("zoom", function () {
+            svg.attr("transform", d3.event.transform);
+        }))
+        .append("g")
+        .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-
-// Graph 1
-var tooltip = d3.select("body")
-    .append("div")
-    .style("position", "absolute")
-    .style("opacity", 0)
-    .attr("class", "tooltip")
-    .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "1px")
-    .style("border-radius", "5px")
-    .style("pointer-events", "none")
-    .style("padding", "10px");
-
-let svg = d3.select("#graph1")
-    .append("svg")
-    .attr('width', graph_1_width)
-    .attr('height', graph_1_height)
-    .call(d3.zoom().on("zoom", function () {
-        svg.attr("transform", d3.event.transform);
-    }))
-    .append("g")
-    .attr('transform', `translate(${margin.left}, ${margin.top})`);
-
-d3.csv("data/netflix.csv").then(function (data) {
-    data = getActorNetwork(data, x => x.type == "TV Show");
+    data = getActorNetwork(data, x => x.type == "Movie");
     console.log(d3.max(data.links, v => v.weight));
 
     let weightScale = d3.scaleLinear()
@@ -60,44 +49,38 @@ d3.csv("data/netflix.csv").then(function (data) {
         .data(data.nodes)
         .enter()
         .append("circle")
-        .attr("r", 5)
+        .attr("r", 10)
         .style("fill", "#1019c4")
         .on("mouseover", mouseover)
-        .on("mousemove", mousemove)
+        //.on("mousemove", mousemove)
         .on("mouseleave", mouseleave)
         .call(d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended));
+            .on("start", function (d) {
+                if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            })
+            .on("drag", function (d) {
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
+            })
+            .on("end", function (d) {
+                if (!d3.event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }));
 
-    // Let's list the force we wanna apply on the network
-    var simulation = d3.forceSimulation(data.nodes)                 // Force algorithm is applied to data.nodes
-        .force("link", d3.forceLink()                               // This force provides links between nodes
-            .id(function (d) { return d.id; })                     // This provide  the id of a node
-            .links(data.links)                                    // and this the list of links
+
+    var simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink()
+            .id(function (d) { return d.id; })
+            .links(data.links)
         )
-        .force("charge", d3.forceManyBody().strength(-150))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-        .force("center", d3.forceCenter(graph_1_width / 2, graph_1_height / 2))     // This force attracts nodes to the center of the svg area
+        .force("charge", d3.forceManyBody().strength(-150))
+        .force("center", d3.forceCenter(width / 2, height / 2))
         .on("tick", ticked);
 
-    function dragstarted(d) {
-        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-    }
 
-    function dragged(d) {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
-    }
-
-    function dragended(d) {
-        if (!d3.event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-    }
-
-    // This function is run at each iteration of the force algorithm, updating the nodes position.
     function ticked() {
         link
             .attr("x1", function (d) { return d.source.x; })
@@ -111,33 +94,35 @@ d3.csv("data/netflix.csv").then(function (data) {
     }
 
 
-
-
-    // A function that change this tooltip when the user hover a point.
-    // Its opacity is set to 1: we can now see it. Plus it set the text and position of tooltip depending on the datapoint (d)
     function mouseover(d) {
-        tooltip
-            .style("opacity", 1)
-            .html(`Big Boi: ${d.name}`)
-    }
-    function mousemove(d) {
         var bodyRect = document.body.getBoundingClientRect(),
             elemRect = this.getBoundingClientRect(),
             offsety = elemRect.top - bodyRect.top,
             offsetx = elemRect.left - bodyRect.left;
-        console.log(offsetx, offsety);
         tooltip
-            .style("top", `${offsety}px`)
-            .style("left", `${offsetx}px`);
+            .style("opacity", 1)
+            .html(`Actor: ${d.name}`)
+            .style("top", `${offsety + 20}px`)
+            .style("left", `${offsetx + 5}px`);
     }
-    // A function that change this tooltip when the leaves a point: just need to set opacity to 0 again
+    /*     function mousemove(d) {
+            var bodyRect = document.body.getBoundingClientRect(),
+                elemRect = this.getBoundingClientRect(),
+                offsety = elemRect.top - bodyRect.top,
+                offsetx = elemRect.left - bodyRect.left;
+            tooltip
+                .style("top", `${offsety - 5}px`)
+                .style("left", `${offsetx + 5}px`);
+        } */
     function mouseleave(d) {
         tooltip
             .transition()
             .duration(200)
-            .style("opacity", 0)
+            .style("opacity", 0);
     }
-});
+};
+
+
 
 function getActorNetwork(data, filt) {
     if (!(filt === undefined)) {
@@ -145,7 +130,7 @@ function getActorNetwork(data, filt) {
     }
     let nodes = []
     let links = []
-    id_map = getTopActors(data, 100)
+    id_map = getTopActors(data, 100, 300)
     for (n = 0; n < id_map.length; n++) {
         nodes.push({ "name": id_map[n], "id": n });
     }
@@ -173,10 +158,10 @@ function getActorNetwork(data, filt) {
 
     };
     return { "nodes": nodes, "links": links };
-}
+};
 
 
-function getTopActors(data, keepcount) {
+function getTopActors(data, cutstart, cutend) {
     let actorsall = data.flatMap(x => x["cast"].split(",").map(str => str.trim()));
     let keys = Array.from(new Set(actorsall));
     actor_counts = keys.map(function (actor) {
@@ -184,6 +169,5 @@ function getTopActors(data, keepcount) {
     });
     // sort and truncate
     actor_counts.sort((x, y) => x.count < y.count);
-    actor_counts.length = Math.min(data.length, keepcount);
-    return actor_counts.map(x => x.actor);
-}
+    return actor_counts.map(x => x.actor).slice(cutstart, cutend);
+};
