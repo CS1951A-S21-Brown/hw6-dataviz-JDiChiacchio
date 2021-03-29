@@ -2,32 +2,29 @@ function LineChart(width, height, data) {
     const internal_width = width - margin.left - margin.right;
     const internal_height = height - margin.top - margin.bottom;
 
-    // Zoom functon
+    // Zoom function (evil)
     var zoomer = d3.zoom()
         .scaleExtent([1, 8])
-        //.extent([[0, 0], [internal_width, internal_height]])
         .on("zoom", function () {
-            let old_range = [0, internal_width];
-            let new_range = old_range.map(d => d3.event.transform.applyX(d));
-            if (old_range[0] >= new_range[0] && old_range[1] <= new_range[1]) {
+            let t = d3.event.transform;
+            if (t.invertX(0) < 0) {
+                t.x = 0;
+            }
+            if (t.invertX(internal_width) > internal_width) {
+                t.x = x(x.domain()[1]) - internal_width * t.k
+            }
+            // Rescale
+            x.range([0, internal_width].map(d => t.applyX(d)));
+            //update axis
+            svg.selectAll(".x-axis").call(function (old_axis) {
+                old_axis
+                    .attr("transform", `translate(0, ${height - margin.top - margin.bottom})`)
+                    .call(d3.axisBottom(x).ticks(d3.timeYear.every(5)));
+            });
+            // Update points
+            svg.selectAll(".points circle")
+                .attr("cx", d => x(d["date"]));
 
-                // Rescale
-                x.range(new_range);
-                //update axis
-                svg.selectAll(".x-axis").call(function (old_axis) {
-                    old_axis
-                        .attr("transform", `translate(0, ${height - margin.top - margin.bottom})`)
-                        .call(d3.axisBottom(x).ticks(d3.timeYear.every(5)));
-                });
-                // Update points
-                svg.selectAll(".points circle")
-                    .attr("cx", d => x(d["date"]));
-            }
-            else {
-                svg.call(zoomer.transform, d3.zoomIdentity.translate(0, 0).scale(1));
-            }
-            console.log(old_range);
-            console.log(new_range);
         })
 
     let svg = d3.select("#graph2")
@@ -46,9 +43,9 @@ function LineChart(width, height, data) {
         .append("clipPath")
         .attr("id", "cut_margin")
         .append("rect")
-        .attr("x", -2.5) // Small offset to make clipping less visible
-        .attr("y", 0)
-        .attr("width", internal_width + 2.5) // Small offset to make clipping less visible
+        .attr("x", -5) // Small offset to make clipping less visible
+        .attr("y", -5)
+        .attr("width", internal_width + 50) // Small offset to make clipping less visible
         .attr("height", internal_height);
 
     data = getAvgReleaseDates(data, x => x["type"] == "Movie");
