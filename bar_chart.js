@@ -1,4 +1,4 @@
-function barchart(width, height, data) {
+function barChart(width, height, data) {
 
     let svg = d3.select("#graph1")
         .style('max-height', `${graph_1_height}px`)
@@ -33,7 +33,9 @@ function barchart(width, height, data) {
         .text(function (d) { return d.count; });
 
     // Bars
-    let bars = svg.append("g").selectAll("rect").data(data);
+    let bars = svg.append("g")
+        .attr("class", "bars")
+        .selectAll("rect").data(data);
     // Define color scale
     let color = d3.scaleOrdinal()
         .domain(data.map(function (d) { return d["artist"] }))
@@ -60,6 +62,5 @@ function getGenreBreakdown(data, filt) {
         return { "genre": genre, "count": allGenreListings.filter(x => x == genre).length };
     });
     genre_counts.sort((x, y) => x.count < y.count);
-    console.log(genre_counts)
     return genre_counts;
 }

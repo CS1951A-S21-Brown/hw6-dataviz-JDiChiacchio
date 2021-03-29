@@ -24,7 +24,6 @@ function actornetwork(width, height, data) {
         .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
     data = getActorNetwork(data, x => x.type == "Movie");
-    console.log(d3.max(data.links, v => v.weight));
 
     let weightScale = d3.scaleLinear()
         .domain([0, d3.max(data.links, v => v.weight)])
@@ -76,7 +75,7 @@ function actornetwork(width, height, data) {
             .id(function (d) { return d.id; })
             .links(data.links)
         )
-        .force("charge", d3.forceManyBody().strength(-150))
+        .force("charge", d3.forceManyBody().strength(-350))
         .force("center", d3.forceCenter(width / 2, height / 2))
         .on("tick", ticked);
 
@@ -102,7 +101,7 @@ function actornetwork(width, height, data) {
         tooltip
             .style("opacity", 1)
             .html(`Actor: ${d.name}`)
-            .style("top", `${offsety + 20}px`)
+            .style("top", `${offsety + 30}px`)
             .style("left", `${offsetx + 5}px`);
     }
     /*     function mousemove(d) {
@@ -134,7 +133,6 @@ function getActorNetwork(data, filt) {
     for (n = 0; n < id_map.length; n++) {
         nodes.push({ "name": id_map[n], "id": n });
     }
-    console.log(id_map);
     for (let row of data) {
         let cast = row.cast.split(",").map(str => str.trim());
         // Map cast to ids and add new nodes to node list

@@ -1,28 +1,19 @@
-// Add your JavaScript code here
-const MAX_WIDTH = Math.max(1080, window.innerWidth);
-const MAX_HEIGHT = 720;
-const margin = { top: 40, right: 100, bottom: 40, left: 175 };
-
-// Assumes the same graph width, height dimensions as the example dashboard. Feel free to change these if you'd like
-let graph_1_width = MAX_WIDTH, graph_1_height = 720;
-let graph_2_width = (MAX_WIDTH / 2) - 10, graph_2_height = 275;
-let graph_3_width = MAX_WIDTH / 2, graph_3_height = 575;
 
 
+function treemap(width, height, data) {
 
-// Graph 1
-let svg = d3.select("#graph1")
-    .append("svg")
-    .attr('width', graph_1_width)
-    .attr('height', graph_1_height)
-    .call(d3.zoom().on("zoom", function () {
-        svg.attr("transform", d3.event.transform);
-    }))
-    .append("g")
-//.attr('transform', `translate(${margin.left}, ${margin.top})`);
+    let svg = d3.select("#graph2")
+        .append("svg")
+        .attr('width', width)
+        .attr('height', height)
+        .call(d3.zoom().on("zoom", function () {
+            svg.attr("transform", d3.event.transform);
+        }))
+        .append("g")
+    //.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-d3.csv("data/netflix.csv").then(function (data) {
-    root = d3.hierarchy(getGenreBreakdown(data, x => x.type == "Movie"))
+
+    root = d3.hierarchy(getGenreTree(data, x => x.type == "Movie"))
         .sum(function (d) { return d.value; })
         .sort(function (a, b) { return b.value - a.value; });
     // Compute the numeric value for each entity
@@ -31,7 +22,7 @@ d3.csv("data/netflix.csv").then(function (data) {
     // The coordinates are added to the root object above
     var treemap = d3.treemap()
         .tile(d3.treemapBinary)
-        .size([graph_1_width, graph_1_height - 5])
+        .size([width, height - 5])
         .padding(5);
     root = treemap(root);
 
@@ -66,9 +57,9 @@ d3.csv("data/netflix.csv").then(function (data) {
         .attr("textLength", function (d) { return `${3 * (d.x1 - d.x0) / 4}px`; })
         .attr("fill", "white")
         .attr("font-weight", "bold");
-});
+}
 
-function getGenreBreakdown(data, filt) {
+function getGenreTree(data, filt) {
     if (!(filt === undefined)) {
         data = data.filter(filt);
     }

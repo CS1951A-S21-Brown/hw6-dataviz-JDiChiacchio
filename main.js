@@ -8,6 +8,7 @@ let graph_2_width = (MAX_WIDTH / 2) - 10, graph_2_height = 275;
 let graph_3_width = MAX_WIDTH / 2, graph_3_height = 575;
 
 d3.csv("data/netflix.csv").then(function (data) {
-    barchart(graph_1_width, graph_1_height, data);
+    barChart(graph_1_width, graph_1_height, data);
+    LineChart(graph_2_width, graph_2_height, data)
     actornetwork(graph_3_width, graph_3_height, data);
 });
