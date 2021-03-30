@@ -1,5 +1,6 @@
 // Add your JavaScript code here
 function actornetwork(width, height, data) {
+    data = getActorNetwork(data, x => x.type == "Movie");
 
     var tooltip = d3.select("body")
         .append("div")
@@ -15,6 +16,7 @@ function actornetwork(width, height, data) {
 
     let svg = d3.select("#graph3")
         .append("svg")
+        .style("background-color", "#ccc8be")
         .attr('width', width)
         .attr('height', height)
         .call(d3.zoom().on("zoom", function () {
@@ -23,15 +25,14 @@ function actornetwork(width, height, data) {
         .append("g")
         .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    data = getActorNetwork(data, x => x.type == "Movie");
-
     let weightScale = d3.scaleLinear()
         .domain([0, d3.max(data.links, v => v.weight)])
         .range([0.5, 5]);
 
-    /* let weightScale = d3.scaleLinear()
-        .domain([0, d3.max(data.links, v => v.weight)])
-        .range(d3.quantize(d3.interpolateHcl("#8a3636", "#ff0000"), d3.max(data.links, v => v.weight))); */
+    // Color Scale for pretty
+    let color = d3.scaleLinear()
+        .domain(d3.extent(data["nodes"], val => val["id"]))
+        .range(d3.quantize(d3.interpolateHcl("#e6ae17", "#e6df17"), data["nodes"].length));
 
 
     var link = svg
@@ -49,9 +50,8 @@ function actornetwork(width, height, data) {
         .enter()
         .append("circle")
         .attr("r", 10)
-        .style("fill", "#1019c4")
+        .style("fill", node => color(node["id"])) // color nodes on scale based on # of movies actor is in
         .on("mouseover", mouseover)
-        //.on("mousemove", mousemove)
         .on("mouseleave", mouseleave)
         .call(d3.drag()
             .on("start", function (d) {
@@ -75,7 +75,7 @@ function actornetwork(width, height, data) {
             .id(function (d) { return d.id; })
             .links(data.links)
         )
-        .force("charge", d3.forceManyBody().strength(-350))
+        .force("charge", d3.forceManyBody().strength(-350).distanceMax(Math.sqrt((width / 2) ** 2 + (height / 2) ** 2)))
         .force("center", d3.forceCenter(width / 2, height / 2))
         .on("tick", ticked);
 
@@ -100,19 +100,10 @@ function actornetwork(width, height, data) {
             offsetx = elemRect.left - bodyRect.left;
         tooltip
             .style("opacity", 1)
-            .html(`Actor: ${d.name}`)
+            .html(`${d.name}`)
             .style("top", `${offsety + 30}px`)
             .style("left", `${offsetx + 5}px`);
     }
-    /*     function mousemove(d) {
-            var bodyRect = document.body.getBoundingClientRect(),
-                elemRect = this.getBoundingClientRect(),
-                offsety = elemRect.top - bodyRect.top,
-                offsetx = elemRect.left - bodyRect.left;
-            tooltip
-                .style("top", `${offsety - 5}px`)
-                .style("left", `${offsetx + 5}px`);
-        } */
     function mouseleave(d) {
         tooltip
             .transition()
@@ -120,7 +111,6 @@ function actornetwork(width, height, data) {
             .style("opacity", 0);
     }
 };
-
 
 
 function getActorNetwork(data, filt) {
@@ -169,3 +159,5 @@ function getTopActors(data, cutstart, cutend) {
     actor_counts.sort((x, y) => x.count < y.count);
     return actor_counts.map(x => x.actor).slice(cutstart, cutend);
 };
+
+

@@ -20,12 +20,51 @@
             <H4>Number of Titles By Genre</H4>
             <div id="graph1">
             </div>
+            <H4>Average Movie Runtime by Year</H4>
             <div id="graph2"></div><br />
         </div>
         <div class="col-lg-6">
-            <H4>Coappearing Actors</H4>
+            <H4>Actors Who Share a Film</H4>
             <div id="graph3"></div>
         </div>
+    </div>
+    <div class="questions">
+        <p> <br><br>
+            1. My first and second graph directly plot the relationships which questions one and two ask about. All of
+            my graphs include pan and zoom to allow for more detailed inspection of the data. The third graph maps
+            connects actors who have mutually appeared in a film, with edges that scale based on how many films the
+            actors share. I intended to add more filter to this one so that the space could be easily explored, but I
+            ran out of time.
+            2. Working with d3 was helpful because it's so extremely configurable. It seemed like there were always
+            several ways to approach any particular idea I had. at the same time, I felt like the library was very tuned
+            toward making visualizations with a familiar, well known style that's easily recognizable. Finally, I was
+            surprised by how easy it was to associate visualizations with any given data; I definitely expected this
+            aspect of the process to be more difficult than it turned out to be.
+            3. The other side of coin, for me, was that I often found myself really struggling to get the exact behavior
+            that I wanted from d3. This was especially troublesome when I was trying to use the zoom functions with
+            constraints; it seemed like there wasn't really a clear consensus online about how to go about this. Also,
+            it seems like when there's a significant requirement for real time data processing it may be better to use a
+            dedicated back end instead of relying fully on java script; This became apparent when I was creating actor
+            pairs for my network graph. Finally, I think that d3 is less well suited for quick visualization tasks that
+            aren't intended for public release. In these cases I think python and a library like matplotlib or bokeh
+            make better choices for the sake of quick and easy analysis.
+
+            <br> Accessibility Questions<br>
+            1. My visualization is accessible in that it never relies on color to convey necessary information, instead
+            only using gentle color gradients for aesthetic enhancement. The ability to pan and zoom is also, in my
+            opinion, a nice feature in terms of accessibility: it allows the viewers to interact with the graph at a
+            scale which is comfortable in relation to their visual and attention. Less directly, I think that making use
+            of helpful class names in my visualization's html could be helpful for who parse through data points in that
+            way. This is something that I could have done a little better on, but I tried to include some degree of
+            organization. Finally, It seems that the tooltips used in my network graph could be inaccessible for some;
+            it may be difficult to locate points and hover to get information for people with visual impairment. I'm not
+            really sure how I could rectify this given the nature of the graph, but it's good to consider.
+            2. In general running out of time prevented me from including a lot of features that I wanted to include. I
+            would have liked to include more annotations and textual information that could be helpful for anyone trying
+            to make sense of the data, especially those who would otherwise have trouble parsing the visuals. I didn't
+            plan for any non-visual elements, though, and frankly I wouldn't even know how to start in this respect. It
+            seems like an interesting topic though.
+        </p>
     </div>
     <!--Feel free to add more JavaScript files as needed-->
     <script type="text/javascript" src="bar_chart.js"></script>

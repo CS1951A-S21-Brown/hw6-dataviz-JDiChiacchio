@@ -1,4 +1,6 @@
 function LineChart(width, height, data) {
+    data = getAvgReleaseDates(data, x => x["type"] == "Movie");
+    const margin = { top: 40, right: 40, bottom: 40, left: 75 };
     const internal_width = width - margin.left - margin.right;
     const internal_height = height - margin.top - margin.bottom;
 
@@ -19,7 +21,7 @@ function LineChart(width, height, data) {
             svg.selectAll(".x-axis").call(function (old_axis) {
                 old_axis
                     .attr("transform", `translate(0, ${height - margin.top - margin.bottom})`)
-                    .call(d3.axisBottom(x).ticks(d3.timeYear.every(5)));
+                    .call(d3.axisBottom(x).ticks(d3.timeYear.every(5)).tickSizeInner(1));
             });
             // Update points
             svg.selectAll(".points circle")
@@ -48,12 +50,12 @@ function LineChart(width, height, data) {
         .attr("width", internal_width + 50) // Small offset to make clipping less visible
         .attr("height", internal_height);
 
-    data = getAvgReleaseDates(data, x => x["type"] == "Movie");
-    // Linear scale for counts
+
+    // Time scale for year
     var x = d3.scaleTime()
         .domain(d3.extent(data, function (d) { return d.date; }))
         .range([0, internal_width]);
-    // Scale band for genre
+    // Linear scale for avg duration
     let y = d3.scaleLinear()
         .domain([0, d3.max(data, val => val["avg_dur"])])
         .range([internal_height, 0]);
@@ -65,7 +67,7 @@ function LineChart(width, height, data) {
     svg.append("g")
         .attr("class", "x-axis")
         .attr("clip-path", "url(#cut_margin)")
-        .attr("transform", `translate(0, ${height - margin.top - margin.bottom})`)
+        .attr("transform", `translate(0, ${internal_height})`)
         .call(d3.axisBottom(x).ticks(d3.timeYear.every(5)));
 
     // Points
@@ -82,6 +84,19 @@ function LineChart(width, height, data) {
         .attr("r", 5)
         .attr("fill", "#69b3a2")
 
+    d3.select("#graph2 > svg").append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", margin.left / 2 - 20)
+        .attr("x", -(height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Runtime (min)");
+    d3.select("#graph2 > svg").append("text")
+        .attr("x", width / 2)
+        .attr("y", height - (margin.bottom / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Release Year");
 }
 
 function getAvgReleaseDates(data, filt) {

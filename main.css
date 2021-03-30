@@ -11,10 +11,8 @@
 
 /* Include any custom CSS styling here! */
 
-#graph1 {
-    overflow-x: scroll;
-    overflow-y: scroll;
-    transform: scaleX(-1);
+.col-lg-6 {
+    text-align: center;
 }
 
   
